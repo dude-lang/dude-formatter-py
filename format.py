@@ -7,7 +7,9 @@ from dude_ast import *
 
 
 def format_expression(expression: Expression, ctx: Context) -> str:
-    if isinstance(expression, Number):
+    if isinstance(expression, EmptyExpression):
+        return 'TODO'
+    elif isinstance(expression, Number):
         return str(expression.number)
     elif isinstance(expression, Identifier):
         return expression.name
@@ -35,6 +37,16 @@ def format_statement(statement: Statement, ctx: Context) -> str:
     elif isinstance(statement, ReturnStatement):
         return 'ret' if not statement.expression else 'ret {}'.format(format_expression(statement.expression, ctx))
 
+    elif isinstance(statement, StructureStatement):
+        return 'dat {}\n{}\nend\n\n'.format(
+            statement.name.name,
+            ','.join([format_expression(x, ctx) for x in statement.members]))
+
+    if isinstance(statement, WhileLoopStatement):
+        return 'while {}\n{}\nend\n\n'.format(
+            format_expression(statement.condition, ctx),
+            '\n'.join([format_statement(x, ctx) for x in statement.body]))
+
     elif isinstance(statement, FunctionStatement):
         return 'fun {}({})\n{}\nend\n\n'.format(
             statement.name.name,
@@ -42,17 +54,17 @@ def format_statement(statement: Statement, ctx: Context) -> str:
             '\n'.join([format_statement(x, ctx) for x in statement.body]))
 
     elif isinstance(statement, ConditionalStatement):
-        _if = '{:6s} {} {}'.format(
+        _if = '{:6s} {}\n{}'.format(
             'if',
             format_expression(statement.if_condition, ctx),
             '\n'.join([format_statement(x, ctx) for x in statement.if_body]))
 
-        _elif = '' if not statement.elif_condition else '{:6s} {} {}'.format(
+        _elif = '' if not statement.elif_condition else '{:6s} {}\n{}'.format(
             'elif',
             format_expression(statement.elif_condition, ctx),
             '\n'.join([format_statement(x, ctx) for x in statement.elif_body]))
 
-        _else = '' if not statement.else_body else '{:6s} {}'.format(
+        _else = '' if not statement.else_body else '{:6s}\n{}'.format(
             'else',
             '\n'.join([format_statement(x, ctx) for x in statement.else_body]))
 

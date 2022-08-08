@@ -1,14 +1,11 @@
-import os
-import sys
-
-sys.path.append(str(os.path.dirname(__file__) + '\\..'))
-
 from dude_ast import *
 
 
 def format_expression(expression: Expression, ctx: Context) -> str:
     if isinstance(expression, EmptyExpression):
-        return 'TODO'
+        return ''
+    elif isinstance(expression, Null):
+        return 'null'
     elif isinstance(expression, Number):
         return str(expression.number)
     elif isinstance(expression, Identifier):
@@ -21,6 +18,13 @@ def format_expression(expression: Expression, ctx: Context) -> str:
         return expression.char
     elif isinstance(expression, Operator):
         return expression.operator
+    elif isinstance(expression, List):
+        return '[{}]'.format(','.join([format_expression(x, ctx) for x in expression.elements]))
+    elif isinstance(expression, Sequence):
+        return '[{}:{}{}]'.format(
+            format_expression(expression.start, ctx),
+            format_expression(expression.stop, ctx),
+            '' if expression.step else ':{}'.format(format_expression(expression.step, ctx)))
     elif isinstance(expression, Condition):
         return '{} {} {}'.format(
             *[format_expression(x, ctx) for x in [expression.left, expression.operator, expression.right]])
@@ -42,9 +46,15 @@ def format_statement(statement: Statement, ctx: Context) -> str:
             statement.name.name,
             ','.join([format_expression(x, ctx) for x in statement.members]))
 
-    if isinstance(statement, WhileLoopStatement):
+    elif isinstance(statement, WhileLoopStatement):
         return 'while {}\n{}\nend\n\n'.format(
             format_expression(statement.condition, ctx),
+            '\n'.join([format_statement(x, ctx) for x in statement.body]))
+
+    elif isinstance(statement, ForLoopStatement):
+        return 'for {} in {}\n{}\nend\n\n'.format(
+            statement.index.name,
+            format_expression(statement.sequence, ctx),
             '\n'.join([format_statement(x, ctx) for x in statement.body]))
 
     elif isinstance(statement, FunctionStatement):

@@ -1,8 +1,13 @@
 from argparse import ArgumentParser, FileType
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from format import formatit
 import pickle
+import sys
+import os
+
+sys.path.append(str(os.path.dirname(__file__) + '\\..'))
+
+from dude_formatter import formatit
 
 
 def create_parser() -> ArgumentParser:

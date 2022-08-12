@@ -24,9 +24,9 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    ast = pickle.load(args.file)
+    ast, ctx = pickle.load(args.file)
     t1 = datetime.now()
-    program = formatit(ast)
+    program = formatit(ast, ctx)
     t2 = datetime.now()
 
     if args.time:
